@@ -361,4 +361,28 @@ public class PayTest {
         var PaymentAmount = SQLHelper.getAmountSQL();
         Assertions.assertEquals(45000, PaymentAmount);
     }
+
+
+    @Test
+    @DisplayName("34. Просмотр статуса в MySQL пользователя с удаленной картой")
+    public void SQLStatusDeclinedCard() {
+        var userInfo = new DataHelper.UserInfo(getDeclinedCardInfo(), getValidMonth(), getValidYear(), getRandomName(), getValidCVC());
+        var dashboardPage = new DashboardPage();
+        var paymentPage = dashboardPage.payByCard();
+        paymentPage.formPay(userInfo);
+        paymentPage.verifySuccessNotification();
+        var PaymentStatus = SQLHelper.getStatusSQL();
+        Assertions.assertEquals("DECLINED", PaymentStatus);
+    }
+    @Test
+    @DisplayName("35. Просмотр статуса оплаты в MySQL пользователя с удаленной картой")
+    public void SQLStatusAmountDeclinedCard() {
+        var userInfo = new DataHelper.UserInfo(getDeclinedCardInfo(), getValidMonth(), getValidYear(), getRandomName(), getValidCVC());
+        var dashboardPage = new DashboardPage();
+        var paymentPage = dashboardPage.payByCard();
+        paymentPage.formPay(userInfo);
+        paymentPage.verifySuccessNotification();
+        var PaymentAmount = SQLHelper.getAmountSQL();
+        Assertions.assertEquals(0, PaymentAmount);
+    }
 }
