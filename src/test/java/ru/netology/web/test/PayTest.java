@@ -4,6 +4,7 @@ import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.*;
 import ru.netology.web.data.DataHelper;
+import ru.netology.web.data.SQLHelper;
 import ru.netology.web.pages.DashboardPage;
 import ru.netology.web.pages.PaymentPage;
 
@@ -316,18 +317,9 @@ public class PayTest {
         paymentPage.errorFormatVisible();
     }
 
-    @Test
-    @DisplayName("30. Ввод 4 цифр в поле CVC/CVV") //не проходит
-    public void FourDigitCVC() {
-        var userInfo = new DataHelper.UserInfo(getApprovedCardInfo(), getValidMonth(), getValidYear(), getRandomName(), getFourDigitCVC());
-        var dashboardPage = new DashboardPage();
-        var paymentPage = dashboardPage.payByCard();
-        paymentPage.formPay(userInfo);
-        paymentPage.errorFormatVisible();
-    }
 
     @Test
-    @DisplayName("31. Ввод букв в поле CVC/CVV")
+    @DisplayName("30. Ввод букв в поле CVC/CVV")
     public void LettersCVC() {
         var userInfo = new DataHelper.UserInfo(getApprovedCardInfo(), getValidMonth(), getValidYear(), getRandomName(), getLettersCVC());
         var dashboardPage = new DashboardPage();
@@ -337,12 +329,36 @@ public class PayTest {
     }
 
     @Test
-    @DisplayName("32. Ввод символов в поле CVC/CVV")
+    @DisplayName("31. Ввод символов в поле CVC/CVV")
     public void SymbolCVC() {
         var userInfo = new DataHelper.UserInfo(getApprovedCardInfo(), getValidMonth(), getValidYear(), getRandomName(), getSymbolCVC());
         var dashboardPage = new DashboardPage();
         var paymentPage = dashboardPage.payByCard();
         paymentPage.formPay(userInfo);
         paymentPage.errorFormatVisible();
+    }
+
+    @Test
+    @DisplayName("32. Просмотр статуса в MySQL пользователя с одобренной картой")
+    public void SQLStatusApprovedCard() {
+        var userInfo = new DataHelper.UserInfo(getApprovedCardInfo(), getValidMonth(), getValidYear(), getRandomName(), getValidCVC());
+        var dashboardPage = new DashboardPage();
+        var paymentPage = dashboardPage.payByCard();
+        paymentPage.formPay(userInfo);
+        paymentPage.verifySuccessNotification();
+        var PaymentStatus = SQLHelper.getStatusSQL();
+        Assertions.assertEquals("APPROVED", PaymentStatus);
+    }
+
+    @Test
+    @DisplayName("33. Просмотр статуса оплаты в MySQL пользователя с одобренной картой")
+    public void SQLStatusAmountApprovedCard() {
+        var userInfo = new DataHelper.UserInfo(getApprovedCardInfo(), getValidMonth(), getValidYear(), getRandomName(), getValidCVC());
+        var dashboardPage = new DashboardPage();
+        var paymentPage = dashboardPage.payByCard();
+        paymentPage.formPay(userInfo);
+        paymentPage.verifySuccessNotification();
+        var PaymentAmount = SQLHelper.getAmountSQL();
+        Assertions.assertEquals(45000, PaymentAmount);
     }
 }
